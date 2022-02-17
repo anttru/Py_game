@@ -20,9 +20,9 @@ while not game_over:
         
     
     #modificar objetos
-    if ball.center[0] > 595 or ball.center[0] < 5:
+    if ball.center[0] > 590 or ball.center[0] < 10:
         xinc *= -1
-    if ball.center[1] > 795 or ball.center[1] < 5: 
+    if ball.center[1] > 790 or ball.center[1] < 10: 
         yinc *= -1
     x += xinc
     y += yinc
