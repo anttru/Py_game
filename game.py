@@ -63,7 +63,7 @@ class Racket:
     def checkBallHitsRacket(self):
         if ((self.x + self.width -5 < self.ball.x < self.x + self.width) or (self.x < self.ball.x < self.x + 5)) and (self.y < self.ball.y < self.y + 10):
                 self.ball.xinc *= -1
-        if (self.x < self.ball.x < self.x +self.width) and (self.y < self.ball.y < self.y + 10):
+        if (self.x < self.ball.x < self.x +self.width) and ((self.y < self.ball.y < self.y + 2) or (self.y +8 < self.ball.y < self.y + 10)):
                 self.ball.yinc *= -1
                 if self.ball.xinc < 0:
                     negx = -1
