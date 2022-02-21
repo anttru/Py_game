@@ -1,8 +1,5 @@
-from cmath import sqrt
-from ipaddress import v6_int_to_packed
 from numpy import tan, sqrt
 from random import random, randint
-from re import L
 from turtle import screensize
 import pygame as pg
 
@@ -70,7 +67,7 @@ class Game:
             eventList = pg.event.get()
             
             v = sqrt(self.ball.yinc**2 + self.ball.xinc**2)
-
+            
             if pg.key.get_pressed()[pg.K_RIGHT] and self.racket.x < 500:
                     self.racket.x += 0.2
                     if self.ball.xinc == 0 and self.ball.yinc == 0:
@@ -82,28 +79,31 @@ class Game:
                         self.ball.x -= 0.2
                     self.racket.rect.update(self.racket.x, self.racket.y, 100, 10)
             
-            if (self.racket.x < self.ball.x < self.racket.x +100) and (self.racket.y > self.ball.y > self.racket.y -10):
+            if (self.racket.x < self.ball.x < self.racket.x +100) and (self.racket.y < self.ball.y < self.racket.y + 10):
                 self.ball.yinc *= -1
-                #if self.ball.xinc < 1:
-                #   negx = True
+                if self.ball.xinc < 0:
+                    negx = -1
+                else:
+                    negx = 1
+                if self.ball.yinc < 0:
+                    negy = -1
+                else:
+                    negy = 1
+                if self.ball.x < self.racket.x + 50:
+                    self.ball.yinc = 0.2*(75+0.5*(self.ball.x-self.racket.x))/100 * negy
+                    self.ball.xinc = sqrt(v**2 - self.ball.yinc**2) * negx
+                    
                 
-                #if self.ball.x < self.racket.x + 50:
-                #    self.ball.yinc = 0.2*(75+0.5*(self.ball.x-self.racket.x))/100
-                #    self.ball.xinc = sqrt(v**2 - self.ball.yinc**2)
-                    #if negx == True:
-                    #    self.ball.xinc *= -1
+                if self.ball.x > self.racket.x + 50:
+                    self.ball.yinc = 0.2*(100 - 0.25*(self.ball.x-self.racket.x))/100 * negy
+                    self.ball.xinc = sqrt(v**2 - self.ball.yinc**2) * negx
                 
-                #if self.ball.x > self.racket.x + 50:
-                #    self.ball.yinc = 0.2*(100 - 0.25*(self.ball.x-self.racket.x))/100
-                #    self.ball.xinc = sqrt(v**2 - self.ball.yinc**2)
-                    #if negx == True:
-                    #    self.ball.xinc *= -1
             
             for event in eventList:
                 if event.type == pg.QUIT:
                     game_over = True
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_SPACE and self.ball.xinc == 0 or self.ball.yinc == 0:
+                    if event.key == pg.K_SPACE and self.ball.xinc == 0 and self.ball.yinc == 0:
                         self.ball.xinc += 0.2
                         self.ball.yinc -= 0.2
                     if event.key == pg.K_0 and self.ball.xinc == 0 and self.ball.yinc == 0:
