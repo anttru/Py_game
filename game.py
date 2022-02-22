@@ -1,3 +1,4 @@
+from time import time
 from numpy import tan, sqrt
 from random import randint
 import pygame as pg
@@ -63,6 +64,10 @@ class Racket:
     def checkBallHitsRacket(self):
         if ((self.x + self.width -5 < self.ball.x < self.x + self.width) or (self.x < self.ball.x < self.x + 5)) and (self.y < self.ball.y < self.y + 10):
                 self.ball.xinc *= -1
+                if pg.key.get_pressed()[pg.K_RIGHT]:
+                    self.ball.x += 0.2
+                if pg.key.get_pressed()[pg.K_LEFT]:
+                    self.ball.x -= 0.2
         if (self.x < self.ball.x < self.x +self.width) and ((self.y < self.ball.y < self.y + 2) or (self.y +8 < self.ball.y < self.y + 10)):
                 self.ball.yinc *= -1
                 if self.ball.xinc < 0:
@@ -80,7 +85,7 @@ class Racket:
                 if self.ball.x > self.x + self.width//2:
                     self.ball.yinc = 0.2*(100 - 0.25*(self.ball.x-self.x))/100 * negy
                     self.ball.xinc = sqrt(self.ball.v**2 - self.ball.yinc**2) * negx
-    
+
     def drawRacket(self):
         pg.draw.rect(self.screen, self.color, self.rect)
 
@@ -92,6 +97,7 @@ class Game:
         self.balls = []
         self.bricks = []
         self.generateBricks()
+        #self.clock = pg.time.Clock()
         #for i in range(randint(0,20)):
         #   self.balls.append(Ball(self.screen, randint(0,600), randint(0, 800), (randint(0,255),randint(0,255),randint(0,255)), randint(5,20), xinc=random(), yinc=(random())))
     
@@ -103,7 +109,7 @@ class Game:
         game_over = False
         
         while not game_over:
-            
+            #self.clock.tick(60)
             eventList = pg.event.get()
             
             self.ball.v = sqrt(self.ball.yinc**2 + self.ball.xinc**2)
