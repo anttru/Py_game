@@ -65,9 +65,9 @@ class Racket:
         if ((self.x + self.width -5 < self.ball.x < self.x + self.width) or (self.x < self.ball.x < self.x + 5)) and (self.y < self.ball.y < self.y + 10):
                 self.ball.xinc *= -1
                 if pg.key.get_pressed()[pg.K_RIGHT]:
-                    self.ball.x += 0.2
+                    self.ball.x += 0.4
                 if pg.key.get_pressed()[pg.K_LEFT]:
-                    self.ball.x -= 0.2
+                    self.ball.x -= 0.4
         if (self.x < self.ball.x < self.x +self.width) and ((self.y < self.ball.y < self.y + 2) or (self.y +8 < self.ball.y < self.y + 10)):
                 self.ball.yinc *= -1
                 if self.ball.xinc < 0:
