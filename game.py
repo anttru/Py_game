@@ -30,10 +30,10 @@ class Brick(pg.Rect):
         self.status = True
         self.screen = screen
     def checkCrash(self, ball : Ball):
-        if self.x < ball.x < self.x +100 and ((self.y+40 < ball.y < self.y +50) or (self.y < ball.y < self.y +10)) and self.status == True:
+        if self.x < ball.x < self.x +100 and ((self.y+48 < ball.y < self.y +50) or (self.y < ball.y < self.y +2)) and self.status == True:
             ball.yinc *= -1
             self.status = False
-        if self.y < ball.y < self.y +50 and ((self.x + 95 < ball.x < self.x +100) or (self.x < ball.x < self.x +5)) and self.status == True:
+        if self.y < ball.y < self.y +50 and ((self.x + 98 < ball.x < self.x +100) or (self.x < ball.x < self.x +2)) and self.status == True:
             ball.xinc *= -1
             self.status = False
     def drawBrick(self):
