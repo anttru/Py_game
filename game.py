@@ -115,12 +115,13 @@ class Game:
         self.level = 0
         self.font = None
         self.lives = 3
-        self.levels = {1: (), 2:(5,11,17, 23, 29, 35, 41)}
+        self.levels = {1: (), 
+                       2:(5,11,17,23,29,35,41), 
+                       3: (5,11,17,23,29,35,41,6,7,8,9,10,18,19,20,21,22,30,31,32,33,34)
+                       }
         self.game_over = False
         #self.clock = pg.time.Clock()
-        #for i in range(randint(0,20)):
-        #   self.balls.append(Ball(self.screen, randint(0,600), randint(0, 800), (randint(0,255),randint(0,255),randint(0,255)), randint(5,20), xinc=random(), yinc=(random())))
-    
+            
     def generateBricks(self):
         for i in range(42):
             self.bricks.append(Brick((i*100)%600, 100 + i//6*50, self.screen))
