@@ -1,4 +1,5 @@
-from time import time
+from re import T
+from turtle import width
 from numpy import tan, sqrt
 from random import randint
 import pygame as pg
@@ -13,15 +14,27 @@ class Ball:
         self.xinc = xinc
         self.yinc = yinc
         self.v = sqrt(self.yinc**2 + self.xinc**2)
+        self.dead = False
     def updatePos(self):
         if self.x > (self.screen.get_width() - self.radius) or self.x < (0 +self.radius):
             self.xinc *= -1
-        if self.y > (self.screen.get_height() - self.radius) or self.y < (0 +self.radius):
+        if self.y < (0 +self.radius):
             self.yinc *= -1
+        if self.y > self.screen.get_height():
+                #pg.time.wait(1000)
+                self.xinc = 0
+                self.yinc = 0
+                self.x = 300
+                self.y = 739
+                self.v = 0
+                self.dead = True
+                
         self.x += self.xinc
         self.y += self.yinc
     def drawBall(self):
         pg.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
+    def calculateSpeed(self):
+        self.v = sqrt(self.yinc**2 + self.xinc**2)
 
 class Brick(pg.Rect):
     def __init__(self, x, y, screen):
@@ -97,6 +110,12 @@ class Game:
         self.balls = []
         self.bricks = []
         self.generateBricks()
+        self.newLevel = True
+        self.level = 0
+        self.font = None
+        self.lives = 3
+        self.levels = {1: (), 2:(5,11,17, 23, 29, 35, 41)}
+        self.game_over = False
         #self.clock = pg.time.Clock()
         #for i in range(randint(0,20)):
         #   self.balls.append(Ball(self.screen, randint(0,600), randint(0, 800), (randint(0,255),randint(0,255),randint(0,255)), randint(5,20), xinc=random(), yinc=(random())))
@@ -104,16 +123,81 @@ class Game:
     def generateBricks(self):
         for i in range(42):
             self.bricks.append(Brick((i*100)%600, 100 + i//6*50, self.screen))
-        
+    
+    def checkVictory(self):
+        defeatedBricks = 0
+        for brick in self.bricks:
+            if brick.status == False:
+                defeatedBricks += 1
+            if defeatedBricks >= 42:
+                self.newLevel = True
+            
+    
+    def resetPositions(self):
+        self.ball.xinc = 0
+        self.ball.yinc = 0
+        self.ball.v = 0
+        self.ball.x = 300
+        self.ball.y = 739
+        self.racket.x = 250
+        self.racket.y = 750
+        self.racket.rect.update(250, 750, 100, 10)
+    def levelControl(self):
+        if self.newLevel == True:
+                self.level += 1
+                self.screen.fill((0,0,0))
+                self.font = pg.font.Font("freesansbold.ttf", 32)
+                if self.level in self.levels:
+                    text = self.font.render("LEVEL {}".format(self.level), True, (255,255,255))
+                    self.screen.blit(text, (250,300))
+                    pg.display.flip()
+                    pg.time.wait(2000)
+                    self.resetPositions()
+                    for brick in self.bricks:
+                        brick.status = True
+                    for i in self.levels[self.level]:
+                        self.bricks[i].status = False                    
+                    self.newLevel = False
+                else:
+                    text = self.font.render("YOU SAVED THE MULTIVERSE!!!!!", True, (255,255,255))
+                    self.screen.blit(text, (50,300))
+                    pg.display.flip()
+                    pg.time.wait(2000)
+                    self.game_over = True
+    def writeLivesLevel(self):
+        self.font = pg.font.Font("freesansbold.ttf", 32)
+        textLives = self.font.render("LIVES {}".format(self.lives), True, (255,255,255))
+        textLevel = self.font.render("LEVEL {}".format(self.level), True, (255,255,255))
+        self.screen.blit(textLives, (0,0))
+        self.screen.blit(textLevel, (450,0))  
+
+    def checkGameOver(self):
+        if self.game_over == True:
+               self.screen.fill((0,0,0))
+               self.font = pg.font.Font("freesansbold.ttf", 32)
+               text = self.font.render("GAME OVER".format(self.level), True, (255,255,255))
+               self.screen.blit(text, (250,300))
+               pg.display.flip()
+               pg.time.wait(2000)
+    
     def main_loop(self):
-        game_over = False
-        
-        while not game_over:
+                    
+        while not self.game_over:
             #self.clock.tick(60)
+            
+            #Check stuff
+            self.levelControl()
+            self.checkVictory()
+            self.ball.calculateSpeed()
+            
+            if self.ball.dead == True:
+                self.resetPositions()
+                self.lives -= 1
+                self.ball.dead = False
+
+            #Events and Key presses (includes cheats!)
             eventList = pg.event.get()
-            
-            self.ball.v = sqrt(self.ball.yinc**2 + self.ball.xinc**2)
-            
+
             if pg.key.get_pressed()[pg.K_RIGHT]:
                     self.racket.moveRacket("R")
                                
@@ -121,10 +205,12 @@ class Game:
                     self.racket.moveRacket("L")
             
             self.racket.checkBallHitsRacket()            
-                       
+            
+            if self.lives == 0:
+                self.game_over = True           
             for event in eventList:
                 if event.type == pg.QUIT:
-                    game_over = True
+                    self.game_over = True
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_SPACE and self.ball.v == 0:
                         self.ball.xinc += 0.2
@@ -132,7 +218,6 @@ class Game:
                     if event.key == pg.K_0 and self.ball.v == 0:
                         for brick in self.bricks:
                             brick.status = False
-                            
                     if event.key == pg.K_1 and self.ball.v == 0:
                         for i in range(42):
                             if i % 2 != 0:       
@@ -144,20 +229,24 @@ class Game:
                     if event.key == pg.K_3 and self.ball.v == 0:
                         for i in (5,11,17,23,29,35,41):
                             self.bricks[i].status = False 
+            
+            #Draw everything
             self.screen.fill((255,0,0))
-            #for ball in self.balls:
-            #    ball.drawBall()
-            #    ball.updatePos()
+                     
             for brick in self.bricks:
                 brick.checkCrash(self.ball)
                 if brick.status == True:
                     pg.draw.rect(self.screen, brick.color, brick)
-              
+                        
+            self.writeLivesLevel()
             self.racket.drawRacket()
             self.ball.drawBall()
             self.ball.updatePos()
             pg.display.flip()
             
+            #Check Game Over
+            self.checkGameOver()
+        
 
 
 
@@ -165,3 +254,4 @@ if __name__ == "__main__":
     pg.init()
     game = Game()
     game.main_loop()
+
