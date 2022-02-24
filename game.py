@@ -182,7 +182,7 @@ class Game:
                self.screen.blit(text, (250,300))
                pg.display.flip()
                pg.time.wait(2000)
-    
+     
     def main_loop(self):
                     
         while not self.game_over:
@@ -192,12 +192,16 @@ class Game:
             self.levelControl()
             self.checkVictory()
             self.ball.calculateSpeed()
-            
+            self.racket.checkBallHitsRacket()
+                        
             if self.ball.dead == True:
                 self.resetPositions()
                 self.lives -= 1
                 self.ball.dead = False
-
+            
+            if self.lives == 0:
+                self.game_over = True
+            
             #Events and Key presses (includes cheats!)
             eventList = pg.event.get()
 
@@ -206,11 +210,7 @@ class Game:
                                
             if pg.key.get_pressed()[pg.K_LEFT]:
                     self.racket.moveRacket("L")
-            
-            self.racket.checkBallHitsRacket()            
-            
-            if self.lives == 0:
-                self.game_over = True           
+                                   
             for event in eventList:
                 if event.type == pg.QUIT:
                     self.game_over = True
