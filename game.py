@@ -147,6 +147,21 @@ class Game:
 
     def levelControl(self):
         if self.newLevel == True:
+                if self.level == 0:
+                   cover = pg.image.load("resources\cover.jpg")
+                   self.screen.blit(cover, (0,0))
+                   coverLoop = True
+                   while coverLoop:
+                       self.screen.blit(cover, (0,0))
+                       pg.display.flip()
+                       eventList = pg.event.get()
+                       for event in eventList:
+                        if event.type == pg.QUIT:
+                            self.game_over = True
+                        if event.type == pg.KEYDOWN:
+                           if event.key == pg.K_SPACE:
+                               coverLoop = False
+                               
                 self.level += 1
                 self.screen.fill((0,0,0))
                 self.font = pg.font.Font("freesansbold.ttf", 32)
@@ -177,13 +192,29 @@ class Game:
 
     def checkGameOver(self):
         if self.game_over == True:
-               self.screen.fill((0,0,0))
-               self.font = pg.font.Font("freesansbold.ttf", 32)
-               text = self.font.render("GAME OVER".format(self.level), True, (255,255,255))
-               self.screen.blit(text, (250,300))
-               pg.display.flip()
-               pg.time.wait(2000)
-     
+               playMore = True 
+               while playMore:
+                   eventList = pg.event.get()
+                   for event in eventList:
+                       if event.type == pg.QUIT:
+                            playMore = False
+                       if event.type == pg.KEYDOWN:
+                           if event.key == pg.K_SPACE:
+                               self.game_over = False
+                               playMore = False
+                               self.level = 0
+                               self.lives = 3
+                           if event.key == pg.K_x:
+                               playMore = False
+
+                   self.screen.fill((0,0,0))
+                   self.font = pg.font.Font("freesansbold.ttf", 32)
+                   text = self.font.render("GAME OVER".format(self.level), True, (255,255,255))
+                   text2 = self.font.render("X to Quit Space to Continue".format(self.level), True, (255,255,255))
+                   self.screen.blit(text, (250,300))
+                   self.screen.blit(text2, (100,45))
+                   pg.display.flip()
+ 
     def main_loop(self):
                     
         while not self.game_over:
