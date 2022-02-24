@@ -1,6 +1,4 @@
-from re import T
-from turtle import width
-from numpy import tan, sqrt
+from numpy import sqrt
 from random import randint
 import pygame as pg
 
@@ -15,6 +13,7 @@ class Ball:
         self.yinc = yinc
         self.v = sqrt(self.yinc**2 + self.xinc**2)
         self.dead = False
+    
     def updatePos(self):
         if self.x > (self.screen.get_width() - self.radius) or self.x < (0 +self.radius):
             self.xinc *= -1
@@ -28,11 +27,12 @@ class Ball:
                 self.y = 739
                 self.v = 0
                 self.dead = True
-                
         self.x += self.xinc
         self.y += self.yinc
+    
     def drawBall(self):
         pg.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
+    
     def calculateSpeed(self):
         self.v = sqrt(self.yinc**2 + self.xinc**2)
 
@@ -42,6 +42,7 @@ class Brick(pg.Rect):
         self.color = (randint(0,255), randint(0,255), randint(0,255))
         self.status = True
         self.screen = screen
+
     def checkCrash(self, ball : Ball):
         if self.x < ball.x < self.x +100 and ((self.y+48 < ball.y < self.y +50) or (self.y < ball.y < self.y +2)) and self.status == True:
             ball.yinc *= -1
@@ -142,6 +143,7 @@ class Game:
         self.racket.x = 250
         self.racket.y = 750
         self.racket.rect.update(250, 750, 100, 10)
+
     def levelControl(self):
         if self.newLevel == True:
                 self.level += 1
@@ -164,6 +166,7 @@ class Game:
                     pg.display.flip()
                     pg.time.wait(2000)
                     self.game_over = True
+
     def writeLivesLevel(self):
         self.font = pg.font.Font("freesansbold.ttf", 32)
         textLives = self.font.render("LIVES {}".format(self.lives), True, (255,255,255))
@@ -246,9 +249,6 @@ class Game:
             
             #Check Game Over
             self.checkGameOver()
-        
-
-
 
 if __name__ == "__main__":
     pg.init()
