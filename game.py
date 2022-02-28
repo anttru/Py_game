@@ -3,7 +3,7 @@ from random import randint
 import pygame as pg
 
 class Ball:
-    def __init__(self, screen : pg.Surface, x, y, color = (255,255,255), radius = 10, xinc = 0, yinc = 0):
+    def __init__(self, screen : pg.Surface, x = 0, y = 0, color = (255,255,255), radius = 10, xinc = 0, yinc = 0, baseSpeed = 0.2):
         self.x = x
         self.y = y
         self.screen = screen
@@ -11,7 +11,8 @@ class Ball:
         self.radius = radius
         self.xinc = xinc
         self.yinc = yinc
-        self.v = sqrt(self.yinc**2 + self.xinc**2)
+        self.v = sqrt(self.yinc ** 2 + self.xinc ** 2)
+        self.baseSpeed = baseSpeed
         self.dead = False
     
     def updatePos(self):
@@ -23,8 +24,6 @@ class Ball:
                 #pg.time.wait(1000)
                 self.xinc = 0
                 self.yinc = 0
-                self.x = 300
-                self.y = 739
                 self.v = 0
                 self.dead = True
         self.x += self.xinc
@@ -54,19 +53,18 @@ class Brick(pg.Rect):
         pg.draw.rect(self.screen, self.color, self)
 
 class Racket:
-    def __init__(self, screen, x, y, ball : Ball):
+    def __init__(self, screen : pg.Surface, ball : Ball, x = 0, y = 0, v = 0.2):
         self.x = x
         self.y = y
-        self.v = 0.2
+        self.v = v
         self.image = pg.image.load(r".\resources\electric00.png")
         self.image2 = pg.image.load(r".\resources\electric01.png")
         self.image3 = pg.image.load(r".\resources\electric02.png")
         self.images = [self.image, self.image2, self.image3]
         self.screen = screen
         self.color = (255,255,255)
-        self.rect = self.image.get_rect()
-        self.width = self.rect.width
-        self.height = self.rect.height
+        self.width = self.image.get_rect().width
+        self.height = self.image.get_rect().height
         self.state = 0
         self.ball = ball
 
@@ -79,15 +77,14 @@ class Racket:
             self.x -= self.v
             if self.ball.xinc == 0 and self.ball.yinc == 0:
                 self.ball.x -= self.v
-        self.rect.update(self.x, self.y, self.width, self.height)
-    
+            
     def checkBallHitsRacket(self):
         if ((self.x + self.width -5 < self.ball.x < self.x + self.width) or (self.x < self.ball.x < self.x + 5)) and (self.y < self.ball.y < self.y + self.height):
                 self.ball.xinc *= -1
                 if pg.key.get_pressed()[pg.K_RIGHT]:
-                    self.ball.x += 0.4
+                    self.ball.x += self.v * 2
                 if pg.key.get_pressed()[pg.K_LEFT]:
-                    self.ball.x -= 0.4
+                    self.ball.x -= self.v * 2
         if (self.x < self.ball.x < self.x +self.width) and ((self.y < self.ball.y < self.y + 2) or (self.y +self.height-2 < self.ball.y < self.y + self.height)):
                 self.ball.yinc *= -1
                 if self.ball.xinc < 0:
@@ -98,22 +95,23 @@ class Racket:
                     negy = -1
                 else:
                     negy = 1
-                if self.ball.x < self.x + self.width//2:
-                    self.ball.yinc = 0.2*(75+0.5*(self.ball.x-self.x))/100 * negy
-                    self.ball.xinc = sqrt(self.ball.v**2 - self.ball.yinc**2) * negx
+                if self.ball.x < self.x + self.width // 2:
+                    self.ball.yinc = self.ball.baseSpeed * (75 + 0.5 * (self.ball.x-self.x))/100 * negy
+                    self.ball.xinc = sqrt(self.ball.v ** 2 - self.ball.yinc ** 2) * negx
                                 
-                if self.ball.x > self.x + self.width//2:
-                    self.ball.yinc = 0.2*(100 - 0.25*(self.ball.x-self.x))/100 * negy
-                    self.ball.xinc = sqrt(self.ball.v**2 - self.ball.yinc**2) * negx
+                if self.ball.x > self.x + self.width // 2:
+                    self.ball.yinc = self.ball.baseSpeed * (100 - 0.25 * (self.ball.x-self.x)) /100 * negy
+                    self.ball.xinc = sqrt(self.ball.v ** 2 - self.ball.yinc**2) * negx
 
     def drawRacket(self):
         self.screen.blit(self.images[int(self.state)%3], (self.x, self.y))
         self.state += 0.01
+
 class Game:
     def __init__(self, width = 600, height = 800):
         self.screen = pg.display.set_mode((width, height))
-        self.ball = Ball(self.screen, width // 2, height -61, (255,255,0))
-        self.racket = Racket(self.screen, width//2-50, height - 50, self.ball)
+        self.ball = Ball(self.screen, (255,255,0))
+        self.racket = Racket(self.screen, self.ball)
         self.background = pg.image.load(r".\resources\background.jpg")
         self.balls = []
         self.bricks = []
@@ -143,14 +141,15 @@ class Game:
             
     
     def resetPositions(self):
+        
+        self.racket.x = self.screen.get_width() // 2 - self.racket.width // 2
+        self.racket.y = self.screen.get_height() - 50
         self.ball.xinc = 0
         self.ball.yinc = 0
         self.ball.v = 0
-        self.ball.x = 300
-        self.ball.y = 739
-        self.racket.x = 250
-        self.racket.y = 750
-        self.racket.rect.update(250, 750, self.racket.width, self.racket.height)
+        self.ball.x = self.screen.get_width() // 2
+        self.ball.y = self.racket.y -10 - 1
+        
 
     def levelControl(self):
         if self.newLevel == True:
@@ -174,7 +173,7 @@ class Game:
                 self.font = pg.font.Font("freesansbold.ttf", 32)
                 if self.level in self.levels:
                     text = self.font.render("LEVEL {}".format(self.level), True, (255,255,255))
-                    self.screen.blit(text, (250,300))
+                    self.screen.blit(text, (self.screen.get_rect().centerx - text.get_rect().centerx , self.screen.get_rect().centery - text.get_rect().centery))
                     pg.display.flip()
                     pg.time.wait(2000)
                     self.resetPositions()
@@ -185,7 +184,7 @@ class Game:
                     self.newLevel = False
                 else:
                     text = self.font.render("YOU SAVED THE MULTIVERSE!!!!!", True, (255,255,255))
-                    self.screen.blit(text, (50,300))
+                    self.screen.blit(text, (self.screen.get_rect().centerx - text.get_rect().centerx , self.screen.get_rect().centery - text.get_rect().centery))
                     pg.display.flip()
                     pg.time.wait(2000)
                     self.game_over = True
@@ -195,8 +194,8 @@ class Game:
         textLives = self.font.render("LIVES {}".format(self.lives), True, (255,255,255))
         textLevel = self.font.render("LEVEL {}".format(self.level), True, (255,255,255))
         self.screen.blit(textLives, (0,0))
-        self.screen.blit(textLevel, (450,0))  
-
+        self.screen.blit(textLevel, (self.screen.get_width() - textLevel.get_rect().width, 0))
+        
     def checkGameOver(self):
         if self.game_over == True:
                playMore = True 
@@ -218,8 +217,8 @@ class Game:
                    self.font = pg.font.Font("freesansbold.ttf", 32)
                    text = self.font.render("GAME OVER".format(self.level), True, (255,255,255))
                    text2 = self.font.render("X to Quit Space to Continue".format(self.level), True, (255,255,255))
-                   self.screen.blit(text, (250,300))
-                   self.screen.blit(text2, (100,45))
+                   self.screen.blit(text, (self.screen.get_rect().centerx - text.get_rect().centerx , self.screen.get_rect().centery - text.get_rect().centery))
+                   self.screen.blit(text2, (self.screen.get_rect().centerx - text2.get_rect().centerx , 100))
                    pg.display.flip()
  
     def main_loop(self):
@@ -232,7 +231,8 @@ class Game:
             self.checkVictory()
             self.ball.calculateSpeed()
             self.racket.checkBallHitsRacket()
-                        
+            self.ball.updatePos()
+
             if self.ball.dead == True:
                 self.resetPositions()
                 self.lives -= 1
@@ -283,7 +283,6 @@ class Game:
             self.writeLivesLevel()
             self.racket.drawRacket()
             self.ball.drawBall()
-            self.ball.updatePos()
             pg.display.flip()
             
             #Check Game Over
