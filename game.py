@@ -58,10 +58,16 @@ class Racket:
         self.x = x
         self.y = y
         self.v = 0.2
+        self.image = pg.image.load(r".\resources\electric00.png")
+        self.image2 = pg.image.load(r".\resources\electric01.png")
+        self.image3 = pg.image.load(r".\resources\electric02.png")
+        self.images = [self.image, self.image2, self.image3]
         self.screen = screen
         self.color = (255,255,255)
-        self.width = 100
-        self.rect = pg.Rect(self.x, self.y, self.width, 10)
+        self.rect = self.image.get_rect()
+        self.width = self.rect.width
+        self.height = self.rect.height
+        self.state = 0
         self.ball = ball
 
     def moveRacket(self, direction):
@@ -73,16 +79,16 @@ class Racket:
             self.x -= self.v
             if self.ball.xinc == 0 and self.ball.yinc == 0:
                 self.ball.x -= self.v
-        self.rect.update(self.x, self.y, self.width, 10)
+        self.rect.update(self.x, self.y, self.width, self.height)
     
     def checkBallHitsRacket(self):
-        if ((self.x + self.width -5 < self.ball.x < self.x + self.width) or (self.x < self.ball.x < self.x + 5)) and (self.y < self.ball.y < self.y + 10):
+        if ((self.x + self.width -5 < self.ball.x < self.x + self.width) or (self.x < self.ball.x < self.x + 5)) and (self.y < self.ball.y < self.y + self.height):
                 self.ball.xinc *= -1
                 if pg.key.get_pressed()[pg.K_RIGHT]:
                     self.ball.x += 0.4
                 if pg.key.get_pressed()[pg.K_LEFT]:
                     self.ball.x -= 0.4
-        if (self.x < self.ball.x < self.x +self.width) and ((self.y < self.ball.y < self.y + 2) or (self.y +8 < self.ball.y < self.y + 10)):
+        if (self.x < self.ball.x < self.x +self.width) and ((self.y < self.ball.y < self.y + 2) or (self.y +self.height-2 < self.ball.y < self.y + self.height)):
                 self.ball.yinc *= -1
                 if self.ball.xinc < 0:
                     negx = -1
@@ -101,13 +107,14 @@ class Racket:
                     self.ball.xinc = sqrt(self.ball.v**2 - self.ball.yinc**2) * negx
 
     def drawRacket(self):
-        pg.draw.rect(self.screen, self.color, self.rect)
-
+        self.screen.blit(self.images[int(self.state)%3], (self.x, self.y))
+        self.state += 0.01
 class Game:
     def __init__(self, width = 600, height = 800):
         self.screen = pg.display.set_mode((width, height))
         self.ball = Ball(self.screen, width // 2, height -61, (255,255,0))
         self.racket = Racket(self.screen, width//2-50, height - 50, self.ball)
+        self.background = pg.image.load(r".\resources\background.jpg")
         self.balls = []
         self.bricks = []
         self.generateBricks()
@@ -143,7 +150,7 @@ class Game:
         self.ball.y = 739
         self.racket.x = 250
         self.racket.y = 750
-        self.racket.rect.update(250, 750, 100, 10)
+        self.racket.rect.update(250, 750, self.racket.width, self.racket.height)
 
     def levelControl(self):
         if self.newLevel == True:
@@ -266,8 +273,8 @@ class Game:
                             self.bricks[i].status = False 
             
             #Draw everything
-            self.screen.fill((255,0,0))
-                     
+            
+            self.screen.blit(self.background, (0,0))         
             for brick in self.bricks:
                 brick.checkCrash(self.ball)
                 if brick.status == True:
